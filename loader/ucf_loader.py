@@ -88,8 +88,11 @@ class UCF_DataLoader(Dataset):
         split2 = self.data['split2'].values[idx]
         split3 = self.data['split3'].values[idx]
         video_path = os.path.join(self.video_root, 'ucf', 'ucf101', video_id)
+        # print("~~idx~~",idx)
+        # print("~~video_path~~",video_path)
+
         if not(os.path.isfile(video_path)):
-            print(video_path)
+            print("errorrrrrrpath",video_path)
             raise ValueError
         video = self._get_video(video_path, self.num_clip, flip=self.with_flip)
         return {'video': video, 'label': label, 'split1': split1, 'split2': split2, 'split3': split3}

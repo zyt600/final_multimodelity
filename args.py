@@ -17,7 +17,8 @@ def get_args(description='VT-TWINS'):
     parser.add_argument('--num_clip', type=int, default=8, help='num clips')
     parser.add_argument('--batch_size', type=int, default=16, help='batch size')
     parser.add_argument('--num_windows_test', type=int, default=10, help='number of testing windows')
-    parser.add_argument('--batch_size_val', type=int, default=10, help='batch size eval')
+    # parser.add_argument('--batch_size_val', type=int, default=10, help='batch size eval')
+    parser.add_argument('--batch_size_val', type=int, default=2, help='batch size eval')
     parser.add_argument('--momemtum', type=float, default=0.9, help='SGD momemtum')
     parser.add_argument('--n_display', type=int, default=400, help='Information display frequence')
     parser.add_argument('--num_frames', type=int, default=32, help='random seed')
@@ -46,7 +47,7 @@ def get_args(description='VT-TWINS'):
     parser.add_argument('--dist-backend', default='gloo', type=str, help='distributed backend')
     parser.add_argument('--seed', default=1, type=int, help='seed for initializing training. ')
     parser.add_argument('--gpu', default=None, type=int, help='GPU id to use.')
-    # parser.add_argument('--gpu', default=1, type=int, help='GPU id to use.')
+    # parser.add_argument('--gpu', default=0, type=int, help='GPU id to use.')
     parser.add_argument('--multiprocessing-distributed', action='store_true', help='Use multi-processing distributed training to launch N processes per node, '
                         'which has N GPUs. This is the fastest way to use PyTorch for either single node or multi node data parallel training')
     args = parser.parse_args()
