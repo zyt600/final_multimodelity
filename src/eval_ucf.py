@@ -127,7 +127,8 @@ def main_worker(gpu, ngpus_per_node, main, args):
     cudnn.benchmark = True
     args.gpu = gpu
     args.rank = gpu
-    args.world_size = 8
+    # args.world_size = 8
+    args.world_size = 1
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     # s.connect(("8.8.8.8", 80))
     s.connect(("114.114.114.114", 80))

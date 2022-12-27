@@ -15,6 +15,7 @@ def get_args(description='VT-TWINS'):
     parser.add_argument('--num_thread_reader', type=int, default=4, help='')
     parser.add_argument('--num_class', type=int, default=512, help='upper epoch limit')
     parser.add_argument('--num_clip', type=int, default=8, help='num clips')
+    # parser.add_argument('--num_clip', type=int, default=1, help='num clips')
     parser.add_argument('--batch_size', type=int, default=16, help='batch size')
     parser.add_argument('--num_windows_test', type=int, default=10, help='number of testing windows')
     # parser.add_argument('--batch_size_val', type=int, default=10, help='batch size eval')
