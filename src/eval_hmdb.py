@@ -101,6 +101,7 @@ def deploy_model(args):
     checkpoint_path = args.pretrain_cnn_path
     print("=> loading checkpoint '{}'".format(checkpoint_path))
     checkpoint = torch.load(checkpoint_path, map_location='cpu')
+    print("args.gpu",args.gpu)
     torch.cuda.set_device(args.gpu)
     model = S3D(args.num_class, space_to_depth=False, word2vec_path=args.word2vec_path)
     model.cuda(args.gpu)
@@ -125,7 +126,8 @@ def main_worker(gpu, ngpus_per_node, main, args):
     main(args)
 
 def spawn_workers(main, args):
-    ngpus_per_node = 8
+    # ngpus_per_node = 8
+    ngpus_per_node = 1
     mp.spawn(main_worker, nprocs=ngpus_per_node, args=(ngpus_per_node, main, args))
 
 if __name__ == "__main__":

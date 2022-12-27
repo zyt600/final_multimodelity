@@ -2,3 +2,4 @@
 .idea/*
 checkpoint/pretrained.pth.tar
 data/downstream/ucf/ucf101/*
+data/downstream/hmdb/*

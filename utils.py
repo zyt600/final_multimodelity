@@ -11,6 +11,22 @@ class AllGather(torch.autograd.Function):
     @staticmethod
     def forward(ctx, tensor, args):
         output = [torch.empty_like(tensor) for _ in range(args.world_size)]
+
+
+        print("outputaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+        print(output)
+        print("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+        print(len(output))
+        for i in output:
+            print(i)
+        print("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+        print("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+        print(tensor)
+        print("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+        print(type(tensor))
+        print("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+        print(torch.cat(output, 0))
+
         dist.all_gather(output, tensor)
         ctx.rank = args.rank
         ctx.batch_size = tensor.shape[0]

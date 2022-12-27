@@ -36,24 +36,10 @@ def main(args):
 
 
 
-
-
-
-
     # 这里有问题？？？？？？？？？？到时候测试一下windows 我下载的是avi，要求是mp4
 
 
 
-
-
-
-
-
-
-
-
-    # test_dataset = UCF_DataLoader(data=r'data\ucf.csv', num_clip=args.num_windows_test, video_root=args.eval_video_root,
-    #                         num_frames=args.num_frames, size=args.video_size, crop_only=False, center_crop=True, with_flip=True, )
     test_sampler = torch.utils.data.distributed.DistributedSampler(test_dataset)
     test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=args.batch_size_val, shuffle=False, drop_last=False, 
                                             num_workers=args.num_thread_reader, sampler=test_sampler)
@@ -108,6 +94,10 @@ def test(test_loader, model, args):
             video_embd = model(video, None, mode='video', mixed5c=True)
             video_embd = video_embd.view(len(data['label']), -1, video_embd.shape[1])
             all_video_embd.append(video_embd)
+
+    print("!!!~~~video_embd~~~!!!",type(video_embd))
+    print(video_embd)
+    print("~~~~~~~~~~~~enenddd~~~~~~~~~~~")
 
     all_video_embd = torch.cat(all_video_embd, dim=0)
     all_video_embd = allgather(all_video_embd, args)
