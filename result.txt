@@ -1,3 +1,9 @@
 
 HMDB
 Split1: 93.33 - Split2: 98.84 - Split3: 96.30 - Mean: 96.16
+
+HMDB
+Split1: 93.33 - Split2: 98.84 - Split3: 96.30 - Mean: 96.16
+
+HMDB
+Split1: 59.02 - Split2: 58.10 - Split3: 57.71 - Mean: 58.28
