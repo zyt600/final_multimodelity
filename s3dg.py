@@ -8,9 +8,11 @@ import os
 import numpy as np
 import re
 
+
 class InceptionBlock(nn.Module):
 
-    def __init__(self, input_dim, num_outputs_0_0a, num_outputs_1_0a, num_outputs_1_0b, num_outputs_2_0a, num_outputs_2_0b, num_outputs_3_0b, gating=True):
+    def __init__(self, input_dim, num_outputs_0_0a, num_outputs_1_0a, num_outputs_1_0b, num_outputs_2_0a,
+                 num_outputs_2_0b, num_outputs_3_0b, gating=True):
         super(InceptionBlock, self).__init__()
         self.conv_b0 = STConv3D(input_dim, num_outputs_0_0a, [1, 1, 1])
         self.conv_b1_a = STConv3D(input_dim, num_outputs_1_0a, [1, 1, 1])
@@ -44,6 +46,7 @@ class InceptionBlock(nn.Module):
             b3 = self.gating_b3(b3)
         return th.cat((b0, b1, b2, b3), dim=1)
 
+
 class SelfGating(nn.Module):
 
     def __init__(self, input_dim):
@@ -58,15 +61,16 @@ class SelfGating(nn.Module):
         weights = th.sigmoid(weights)
         return weights[:, :, None, None, None] * input_tensor
 
+
 class STConv3D(nn.Module):
 
     def __init__(self,
-                input_dim,
-                output_dim,
-                kernel_size,
-                stride=1,
-                padding=0,
-                separable=False):
+                 input_dim,
+                 output_dim,
+                 kernel_size,
+                 stride=1,
+                 padding=0,
+                 separable=False):
         super(STConv3D, self).__init__()
         self.separable = separable
         self.relu = nn.ReLU(inplace=True)
@@ -102,7 +106,6 @@ class STConv3D(nn.Module):
                                    kernel_size=kernel_size, stride=stride,
                                    padding=padding, bias=False)
             self.bn1 = nn.BatchNorm3d(output_dim)
-
 
     def forward(self, input):
         out = self.relu(self.bn1(self.conv1(input)))
@@ -145,6 +148,7 @@ class MaxPool3dTFPadding(th.nn.Module):
         out = self.pool(inp)
         return out
 
+
 class Sentence_Embedding(nn.Module):
     def __init__(self,
                  embd_dim,
@@ -156,7 +160,7 @@ class Sentence_Embedding(nn.Module):
                  output_dim=2048):
         super(Sentence_Embedding, self).__init__()
         if word2vec_path:
-            self.word_embd = nn.Embedding.from_pretrained(th.load(word2vec_path)) 
+            self.word_embd = nn.Embedding.from_pretrained(th.load(word2vec_path))
         else:
             self.word_embd = nn.Embedding(num_embeddings, word_embedding_dim)
         self.fc1 = nn.Linear(word_embedding_dim, output_dim)
@@ -206,7 +210,8 @@ class Sentence_Embedding(nn.Module):
 
 class S3D(nn.Module):
 
-    def __init__(self, num_classes=512, gating=True, space_to_depth=False, word2vec_path='', init='uniform', token_to_word_path='./data/dict.npy'):
+    def __init__(self, num_classes=512, gating=True, space_to_depth=False, word2vec_path='', init='uniform',
+                 token_to_word_path='./data/dict.npy'):
         super(S3D, self).__init__()
         self.num_classes = num_classes
         self.gating = gating
@@ -228,14 +233,15 @@ class S3D(nn.Module):
         self.mixed_4d = InceptionBlock(self.mixed_4c.output_dim, 128, 128, 256, 24, 64, 64)
         self.mixed_4e = InceptionBlock(self.mixed_4d.output_dim, 112, 144, 288, 32, 64, 64)
         self.mixed_4f = InceptionBlock(self.mixed_4e.output_dim, 256, 160, 320, 32, 128, 128)
-        self.maxpool_5a = self.maxPool3d_5a_2x2 = MaxPool3dTFPadding(kernel_size=(2, 2, 2), stride=(2, 2, 2), padding='SAME')
+        self.maxpool_5a = self.maxPool3d_5a_2x2 = MaxPool3dTFPadding(kernel_size=(2, 2, 2), stride=(2, 2, 2),
+                                                                     padding='SAME')
         self.mixed_5b = InceptionBlock(self.mixed_4f.output_dim, 256, 160, 320, 32, 128, 128)
         self.mixed_5c = InceptionBlock(self.mixed_5b.output_dim, 384, 192, 384, 48, 128, 128)
         self.fc = nn.Linear(self.mixed_5c.output_dim, num_classes)
         self.text_module = Sentence_Embedding(
-                               num_classes,
-                               os.path.join(os.path.dirname(__file__), token_to_word_path),
-                               word2vec_path=os.path.join(os.path.dirname(__file__), word2vec_path))
+            num_classes,
+            os.path.join(os.path.dirname(__file__), token_to_word_path),
+            word2vec_path=os.path.join(os.path.dirname(__file__), word2vec_path))
 
         if init == 'kaiming_normal':
             for m in self.modules():
@@ -248,7 +254,7 @@ class S3D(nn.Module):
     def _space_to_depth(self, input):
         B, C, T, H, W = input.shape
         input = input.view(B, C, T // 2, 2, H // 2, 2, W // 2, 2)
-        input = input.permute(0, 3, 5, 7, 1,  2, 4, 6)
+        input = input.permute(0, 3, 5, 7, 1, 2, 4, 6)
         input = input.contiguous().view(B, 8 * C, T // 2, H // 2, W // 2)
         return input
 
@@ -263,66 +269,66 @@ class S3D(nn.Module):
             raise NotImplementedError
 
     def forward_video(self, inputs, mixed5c=False):
-        #out = {}
+        # out = {}
         if self.space_to_depth:
             inputs = self._space_to_depth(inputs)
         # 'Conv2d_1a_7x7'
         net = self.conv1(inputs)
         if self.space_to_depth:
             net = net[:, :, 1:, 1:, 1:]
-        #out['Conv2d_1a_7x7'] = net
+        # out['Conv2d_1a_7x7'] = net
         # 'MaxPool_2a_3x3'
         net = self.maxpool_2a(net)
-        #out['MaxPool_2a_3x3'] = net
-        #'Conv2d_2b_1x1'
+        # out['MaxPool_2a_3x3'] = net
+        # 'Conv2d_2b_1x1'
         net = self.conv_2b(net)
-        #out['Conv2d_2b_1x1'] = net
+        # out['Conv2d_2b_1x1'] = net
         # 'Conv2d_2c_3x3'
         net = self.conv_2c(net)
-        #out['Conv2d_2c_3x3'] = net
+        # out['Conv2d_2c_3x3'] = net
         if self.gating:
             net = self.gating(net)
-            #out['gating_1'] = net
+            # out['gating_1'] = net
         # 'MaxPool_3a_3x3'
         net = self.maxpool_3a(net)
-        #out['MaxPool_3a_3x3'] = net
+        # out['MaxPool_3a_3x3'] = net
         # end_point = 'Mixed_3b'
         net = self.mixed_3b(net)
-        #out['Mixed_3b'] = net
+        # out['Mixed_3b'] = net
         # end_point = 'Mixed_3c'
         net = self.mixed_3c(net)
-        #out['Mixed_3c'] = net
+        # out['Mixed_3c'] = net
         # end_point = 'MaxPool_4a_3x3'
         net = self.maxpool_4a(net)
-        #out['MaxPool_4a_3x3'] = net
+        # out['MaxPool_4a_3x3'] = net
         # end_point = 'Mixed_4b'
         net = self.mixed_4b(net)
-        #out['Mixed_4b'] = net
+        # out['Mixed_4b'] = net
         # end_point = 'Mixed_4c'
         net = self.mixed_4c(net)
-        #out['Mixed_4c'] = net
+        # out['Mixed_4c'] = net
         # end_point = 'Mixed_4d'
         net = self.mixed_4d(net)
-        #out['Mixed_4d'] = net
+        # out['Mixed_4d'] = net
         # end_point = 'Mixed_4e'
         net = self.mixed_4e(net)
-        #out['Mixed_4e'] = net
+        # out['Mixed_4e'] = net
         # end_point = 'Mixed_4f'
         net = self.mixed_4f(net)
-        #out['Mixed_4f'] = net
-        #end_point = 'MaxPool_5a_2x2'
+        # out['Mixed_4f'] = net
+        # end_point = 'MaxPool_5a_2x2'
         net = self.maxpool_5a(net)
-        #out['MaxPool_5a_2x2'] = net
+        # out['MaxPool_5a_2x2'] = net
         # end_point = 'Mixed_5b'
         net = self.mixed_5b(net)
-        #out['Mixed_5b'] = net
+        # out['Mixed_5b'] = net
         # end_point = 'Mixed_5c'
         net = self.mixed_5c(net)
-        #out['Mixed_5c'] = net
-        #out['Avgpool'] = net
+        # out['Mixed_5c'] = net
+        # out['Avgpool'] = net
         net = th.mean(net, dim=[2, 3, 4])
         if mixed5c:
             return net
         net = self.fc(net)
-        #out['final'] = net
+        # out['final'] = net
         return net
