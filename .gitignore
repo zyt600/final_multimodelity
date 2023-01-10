@@ -3,3 +3,9 @@
 checkpoint/pretrained.pth.tar
 data/downstream/ucf/ucf101/*
 data/downstream/hmdb/*
+*.mp4
+*.webm
+*.pth.tar
+loader/data/dict.npy
+loader/data/all_videos完整.csv
+loader/data/caption.json

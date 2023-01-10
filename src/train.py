@@ -1,4 +1,5 @@
 import warnings
+
 warnings.simplefilter("ignore", UserWarning)
 import os
 import random
@@ -34,16 +35,17 @@ def main():
     args = get_args()
     if args.verbose:
         print(args)
-    assert args.eval_video_root != '' or not(args.evaluate)
+    assert args.eval_video_root != '' or not (args.evaluate)
     assert args.video_path != ''
     assert args.caption_root != ''
     if args.seed is not None:
         random.seed(args.seed)
         torch.manual_seed(args.seed)
 
-    args.multiprocessing_distributed = True
+    # args.multiprocessing_distributed = True
+    args.multiprocessing_distributed = False
     args.evaluate = False
- 
+
     args.distributed = args.world_size > 1 or args.multiprocessing_distributed
     args.world_size = torch.cuda.device_count()
     if args.multiprocessing_distributed:
@@ -52,10 +54,10 @@ def main():
         main_worker(args.gpu, args.world_size, args)
 
 
-
 def main_worker(gpu, ngpus_per_node, args):
     args.gpu = gpu
     if args.distributed:
+        print("~~~distributed")
         dist.init_process_group(
             backend=args.dist_backend,
             init_method=args.dist_url,
@@ -63,7 +65,7 @@ def main_worker(gpu, ngpus_per_node, args):
             rank=args.gpu,
         )
     # create model
-    model = S3D(args.num_class, space_to_depth=True, word2vec_path=args.word2vec_path, init=args.weight_init,)
+    model = S3D(args.num_class, space_to_depth=True, word2vec_path=args.word2vec_path, init=args.weight_init, )
 
     if args.distributed:
         if args.gpu is not None:
@@ -94,8 +96,9 @@ def main_worker(gpu, ngpus_per_node, args):
         crop_only=args.crop_only,
         center_crop=args.centercrop,
         random_left_right_flip=args.random_flip,
-        num_candidates=args.num_candidates,
-        num_clip = args.num_clip,
+        # num_candidates=args.num_candidates,
+        num_candidates=1,
+        num_clip=args.num_clip,
     )
 
     if args.distributed:
@@ -122,12 +125,14 @@ def main_worker(gpu, ngpus_per_node, args):
 
     scheduler = get_cosine_schedule_with_warmup(optimizer, args.warmup_steps, len(train_loader) * args.epochs)
     checkpoint_dir = os.path.join(os.path.dirname(__file__), 'checkpoint', args.checkpoint_dir)
-    if args.checkpoint_dir != '' and not(os.path.isdir(checkpoint_dir)) and args.rank == 0:
+    print("checkpoint_dir", checkpoint_dir)
+    if args.checkpoint_dir != '' and not (os.path.isdir(checkpoint_dir)) and args.rank == 0:
         os.mkdir(checkpoint_dir)
+        print("checkpoint_dir", checkpoint_dir)
 
     if args.cudnn_benchmark:
         cudnn.benchmark = True
-    total_batch_size = args.world_size * args.batch_size 
+    total_batch_size = args.world_size * args.batch_size
     log("Starting training loop for rank: {}, total batch size: {}".format(args.gpu, total_batch_size), args)
     for epoch in tqdm(range(args.start_epoch, args.epochs)):
         if args.distributed:
@@ -154,10 +159,12 @@ def train(train_loader, model, criterion, optimizer, scheduler, epoch, dataset, 
         running_loss += batch_loss
         if (i_batch + 1) % args.n_display == 0 and args.verbose and args.rank == 0:
             d = time.time() - s
-            log(f"Epoch {epoch+1:d}, Elapsed Time: {d:.3f}, Epoch status: {args.batch_size * args.world_size * float(i_batch) / len(dataset):.4f}, \
-                Training loss: {running_loss / args.n_display:.4f}, Learning rates: {optimizer.param_groups[0]['lr']:.6f}", args)
+            log(f"Epoch {epoch + 1:d}, Elapsed Time: {d:.3f}, Epoch status: {args.batch_size * args.world_size * float(i_batch) / len(dataset):.4f}, \
+                Training loss: {running_loss / args.n_display:.4f}, Learning rates: {optimizer.param_groups[0]['lr']:.6f}",
+                args)
             running_loss = 0.0
             s = time.time()
+
 
 def TrainOneBatch(model, opt, scheduler, data, loss_fun, epoch, args):
     video = data["video"].float().cuda(args.gpu, non_blocking=args.pin_memory)
@@ -173,18 +180,22 @@ def TrainOneBatch(model, opt, scheduler, data, loss_fun, epoch, args):
         if args.distributed:
             video_embd = allgather(video_embd, args)
             text_embd = allgather(text_embd, args)
-        loss= loss_fun(video_embd, text_embd)
+        loss = loss_fun(video_embd, text_embd)
     loss.backward()
     opt.step()
     scheduler.step()
     return loss
 
+
 def save_checkpoint(state, checkpoint_dir, epoch, n_ckpt=10):
-    torch.save(state, os.path.join(checkpoint_dir, "epoch{:0>4d}.pth.tar".format(epoch)))
+    print("~~~save~~~", os.path.join(r".\checkpoint", "epoch{:0>4d}.pth.tar".format(epoch)))
+    torch.save(state, os.path.join(r".\checkpoint", "epoch{:0>4d}.pth.tar".format(epoch)))
+
 
 def log(output, args):
-    with open(os.path.join(os.path.dirname(__file__), 'log' , './log.txt'), "a") as f:
+    with open(os.path.join(os.path.dirname(__file__), 'log', './log.txt'), "a") as f:
         f.write(output + '\n')
+
 
 if __name__ == "__main__":
     main()

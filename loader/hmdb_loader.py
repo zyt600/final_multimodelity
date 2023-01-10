@@ -32,6 +32,8 @@ class HMDB_DataLoader(Dataset):
         self.data = pd.read_csv(data)
         self.video_root = video_root
         self.size = size
+        # self.size = 220
+        print("self.size~~~",self.size)
         self.num_frames = num_frames
         self.num_clip = num_clip
         self.crop_only = crop_only
@@ -53,6 +55,8 @@ class HMDB_DataLoader(Dataset):
             ffmpeg
             .input(video_path)
         )
+        # print("type(cmd)~~~",type(cmd))
+        # print("cmd~~~",cmd)
         if self.center_crop:
             aw, ah = 0.5, 0.5
         else:

@@ -1,11 +1,6 @@
 import os
-
+import pandas as pd
 import torch
-# from torch.distributed import *
-tensor_list = [torch.zeros(2, dtype=torch.int64) for _ in range(2)]
-# tensor_list =1
-print(tensor_list)
-rank=2
-tensor = torch.arange(2, dtype=torch.int64) + 1 + 2 * rank
-print(tensor)
-print(torch.arange(2, dtype=torch.int64))
+
+ddata = pd.read_csv(r'D:\OneDrive - Moe, Inc\Desktop\多模态期末\VT-TWINS-main\loader\data\all_videos.csv')
+print(ddata[:5])

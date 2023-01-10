@@ -2,7 +2,7 @@ import argparse
 
 def get_args(description='VT-TWINS'):
     parser = argparse.ArgumentParser(description=description)
-    parser.add_argument('--train_csv', type=str, default='./data/all_videos.csv', help='train csv')
+    parser.add_argument('--train_csv', type=str, default=r'./data/all_videos.csv', help='train csv')
     parser.add_argument('--video_path', type=str, default='./data/videos', help='video_path')
     parser.add_argument('--caption_root', type=str, default='./data/caption_json', help='video_path')
     parser.add_argument('--word2vec_path', type=str, default='./data/word2vec.pth', help='')
@@ -33,7 +33,8 @@ def get_args(description='VT-TWINS'):
     parser.add_argument('--pretrain_cnn_path', type=str, default='', help='')
     parser.add_argument('--fps', type=int, default=10, help='')
     parser.add_argument('--cudnn_benchmark', type=int, default=0, help='')
-    parser.add_argument('--epochs', default=300, type=int, metavar='N', help='number of total epochs to run')
+    # parser.add_argument('--epochs', default=300, type=int, metavar='N', help='number of total epochs to run')
+    parser.add_argument('--epochs', default=9, type=int, metavar='N', help='number of total epochs to run')
     parser.add_argument('--start-epoch', default=0, type=int, metavar='N', help='manual epoch number (useful on restarts)')
     parser.add_argument('--lr', '--learning-rate', default=0.001, type=float, metavar='LR', help='initial learning rate', dest='lr')
     parser.add_argument('--momentum', default=0.9, type=float, metavar='M', help='momentum')
@@ -42,7 +43,8 @@ def get_args(description='VT-TWINS'):
     parser.add_argument('--pretrained', dest='pretrained', action='store_true', help='use pre-trained model')
     parser.add_argument('--pin_memory', dest='pin_memory', action='store_true', help='use pin_memory')
     parser.add_argument('--world-size', default=-1, type=int, help='number of nodes for distributed training')
-    parser.add_argument('--rank', default=-1, type=int, help='node rank for distributed training')
+    # parser.add_argument('--rank', default=-1, type=int, help='node rank for distributed training')
+    parser.add_argument('--rank', default=0, type=int, help='node rank for distributed training')
     parser.add_argument('--dist-file', default='dist-file', type=str, help='url used to set up distributed training')
     parser.add_argument('--dist-url', default='tcp://111.111.111.111:5555', type=str, help='url used to set up distributed training')
     parser.add_argument('--dist-backend', default='gloo', type=str, help='distributed backend')

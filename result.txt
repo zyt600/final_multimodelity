@@ -7,3 +7,30 @@ Split1: 93.33 - Split2: 98.84 - Split3: 96.30 - Mean: 96.16
 
 HMDB
 Split1: 59.02 - Split2: 58.10 - Split3: 57.71 - Mean: 58.28
+
+HMDB
+Split1: 59.02 - Split2: 57.97 - Split3: 57.97 - Mean: 58.32
+
+HMDB300
+Split1: 87.78 - Split2: 98.84 - Split3: 88.89 - Mean: 91.83
+
+HMDB224
+Split1: 93.33 - Split2: 98.84 - Split3: 96.30 - Mean: 96.16
+
+HMDB~224~~~
+Split1: 78.97 - Split2: 78.01 - Split3: 76.63 - Mean: 77.87
+
+HMDB~300~~~
+Split1: 77.80 - Split2: 77.08 - Split3: 75.28 - Mean: 76.72
+
+HMDB~250~~~
+Split1: 78.97 - Split2: 76.85 - Split3: 74.83 - Mean: 76.89
+
+HMDB~200~~~
+Split1: 76.87 - Split2: 79.86 - Split3: 76.40 - Mean: 77.71
+
+HMDB~230~~~
+Split1: 78.97 - Split2: 77.08 - Split3: 75.73 - Mean: 77.26
+
+HMDB~220~~~
+Split1: 76.64 - Split2: 78.01 - Split3: 77.30 - Mean: 77.32

@@ -9,11 +9,14 @@ import time
 import re
 import json
 
+
 class HT100M_DataLoader(Dataset):
     """HowTo100M Video-Text loader."""
 
-    def __init__(self, csv, video_root='', caption_root='', min_time=4.0, fps=16, num_frames=16, size=224, crop_only=False, center_crop=True,
-                benchmark=False, token_to_word_path='./data/dict.npy', max_words=20, num_candidates=1, num_clip=8, random_left_right_flip=False,):
+    def __init__(self, csv, video_root='', caption_root='', min_time=4.0, fps=16, num_frames=16, size=224,
+                 crop_only=False, center_crop=True,
+                 benchmark=False, token_to_word_path='./data/dict.npy', max_words=20, num_candidates=1, num_clip=8,
+                 random_left_right_flip=False, ):
         """
         Args:
         """
@@ -57,15 +60,15 @@ class HT100M_DataLoader(Dataset):
             if self.crop_only:
                 cmd = (
                     cmd.crop('(iw - {})*{}'.format(self.size, aw),
-                            '(ih - {})*{}'.format(self.size, ah),
-                            str(self.size), str(self.size))
+                             '(ih - {})*{}'.format(self.size, ah),
+                             str(self.size), str(self.size))
                 )
             else:
                 cmd = (
                     cmd.crop('(iw - min(iw,ih))*{}'.format(aw),
-                            '(ih - min(iw,ih))*{}'.format(ah),
-                            'min(iw,ih)',
-                            'min(iw,ih)')
+                             '(ih - min(iw,ih))*{}'.format(ah),
+                             'min(iw,ih)',
+                             'min(iw,ih)')
                     .filter('scale', self.size, self.size)
                 )
             if self.random_flip and random.uniform(0, 1) > 0.5:
@@ -112,9 +115,9 @@ class HT100M_DataLoader(Dataset):
         words = th.zeros(self.num_clip, self.max_words, dtype=th.long)
         if len(cap) < self.num_clip:
             for i in range(self.num_clip):
-                start.append(int(cap['start'].values[min(i, len(cap)-1)]))
-                end.append(int(cap['end'].values[min(i, len(cap)-1)]))
-                words[i] = self.words_to_ids(cap['text'].values[min(i, len(cap)-1)])
+                start.append(int(cap['start'].values[min(i, len(cap) - 1)]))
+                end.append(int(cap['end'].values[min(i, len(cap) - 1)]))
+                words[i] = self.words_to_ids(cap['text'].values[min(i, len(cap) - 1)])
         else:
             ind = random.randint(0, len(cap) - self.num_clip)
             for i in range(self.num_clip):
@@ -124,7 +127,9 @@ class HT100M_DataLoader(Dataset):
         return words, start, end
 
     def __getitem__(self, idx):
+        print("idx", idx)
         video_file = self.csv['video_path'][idx]
+        # video_file = self.csv['video_id'][idx]
         video_id = video_file.split('.')[0]
         video_path = os.path.join(self.video_root, video_file)
         text, start, end = self._get_text(os.path.join(self.caption_root, video_id + '.json'))

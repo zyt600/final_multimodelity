@@ -13,17 +13,17 @@ class AllGather(torch.autograd.Function):
         output = [torch.empty_like(tensor) for _ in range(args.world_size)]
 
 
-        print("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+        # print("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
         print(len(output))     # 8
         for i in output:
             print(i.size())  #  torch.Size([37, 10, 1024])
-        print("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
-        print("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
-        print(tensor.size())
-        print("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
-        # print(type(tensor)) # torch.tensor
-        print("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
-        print(torch.cat(output, 0).size())  # torch.Size([296, 10, 1024])
+        # print("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+        # print("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+        # print(tensor.size())
+        # print("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+        # # print(type(tensor)) # torch.tensor
+        # print("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+        # print(torch.cat(output, 0).size())  # torch.Size([296, 10, 1024])
 
         dist.all_gather(output, tensor)
         ctx.rank = args.rank
