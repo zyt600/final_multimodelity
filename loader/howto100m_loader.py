@@ -21,7 +21,12 @@ class HT100M_DataLoader(Dataset):
         Args:
         """
         assert isinstance(size, int)
-        self.csv = pd.read_csv(os.path.join(os.path.dirname(__file__), csv))
+        print("aaaaaaaa~~~", os.path.dirname(__file__))
+        ppp = os.path.join(os.path.dirname(__file__), csv)
+        # self.csv = pd.read_csv(os.path.join(os.path.dirname(__file__), csv))
+        self.csv = pd.read_csv(ppp)
+        print(self.csv)
+        print("bbbbbbbb~~~", ppp)
         self.video_root = video_root
         self.caption_root = caption_root
         self.min_time = min_time
@@ -109,6 +114,8 @@ class HT100M_DataLoader(Dataset):
         return self._words_to_token(self._split_text(x))
 
     def _get_text(self, caption):
+        print("~~~~~~", caption)
+        print("~~~~~~", os.path.abspath(caption))
         caption_json = open(caption, 'r')
         cap = pd.DataFrame(json.load(caption_json))
         start, end = [], []
@@ -127,10 +134,12 @@ class HT100M_DataLoader(Dataset):
         return words, start, end
 
     def __getitem__(self, idx):
-        print("idx", idx)
-        print(self.csv)
+        print("~~~idx", idx, "~~~")
+        # print(self.csv)
+
         # video_file = self.csv['video_path'][idx]
         video_file = self.csv['video_id'][idx]
+
         video_id = video_file.split('.')[0]
         video_path = os.path.join(self.video_root, video_file)
         text, start, end = self._get_text(os.path.join(self.caption_root, video_id + '.json'))

@@ -40,3 +40,12 @@ Starting training loop for rank: 0, total batch size: 16
 Starting training loop for rank: 0, total batch size: 16
 Starting training loop for rank: 0, total batch size: 16
 Starting training loop for rank: 0, total batch size: 16
+Starting training loop for rank: 0, total batch size: 16
+Starting training loop for rank: 0, total batch size: 16
+Starting training loop for rank: 0, total batch size: 16
+Starting training loop for rank: 0, total batch size: 16
+Starting training loop for rank: 0, total batch size: 16
+Starting training loop for rank: 0, total batch size: 16
+Starting training loop for rank: 0, total batch size: 16
+Starting training loop for rank: 0, total batch size: 16
+Starting training loop for rank: 0, total batch size: 16

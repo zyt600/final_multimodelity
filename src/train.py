@@ -125,10 +125,10 @@ def main_worker(gpu, ngpus_per_node, args):
 
     scheduler = get_cosine_schedule_with_warmup(optimizer, args.warmup_steps, len(train_loader) * args.epochs)
     checkpoint_dir = os.path.join(os.path.dirname(__file__), 'checkpoint', args.checkpoint_dir)
-    print("checkpoint_dir", checkpoint_dir)
+    # print("checkpoint_dir", checkpoint_dir)
     if args.checkpoint_dir != '' and not (os.path.isdir(checkpoint_dir)) and args.rank == 0:
         os.mkdir(checkpoint_dir)
-        print("checkpoint_dir", checkpoint_dir)
+        print("makeeee checkpoint_dir", checkpoint_dir)
 
     if args.cudnn_benchmark:
         cudnn.benchmark = True
