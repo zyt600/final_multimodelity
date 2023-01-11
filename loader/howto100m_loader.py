@@ -128,8 +128,9 @@ class HT100M_DataLoader(Dataset):
 
     def __getitem__(self, idx):
         print("idx", idx)
-        video_file = self.csv['video_path'][idx]
-        # video_file = self.csv['video_id'][idx]
+        print(self.csv)
+        # video_file = self.csv['video_path'][idx]
+        video_file = self.csv['video_id'][idx]
         video_id = video_file.split('.')[0]
         video_path = os.path.join(self.video_root, video_file)
         text, start, end = self._get_text(os.path.join(self.caption_root, video_id + '.json'))
