@@ -25,8 +25,6 @@ class HT100M_DataLoader(Dataset):
         ppp = os.path.join(os.path.dirname(__file__), csv)
         # self.csv = pd.read_csv(os.path.join(os.path.dirname(__file__), csv))
         self.csv = pd.read_csv(ppp)
-        print(self.csv)
-        print("bbbbbbbb~~~", ppp)
         self.video_root = video_root
         self.caption_root = caption_root
         self.min_time = min_time
@@ -53,16 +51,28 @@ class HT100M_DataLoader(Dataset):
         videos = th.zeros(self.num_clip, 3, self.num_frames, self.size, self.size)
         for i, (s, e) in enumerate(zip(start, end)):
             start_seek = random.randint(s, int(max(s, e - self.num_sec)))
+            # print("video_path", video_path)
+            # print("start_seek", start_seek)
+            # print("self.num_sec + 0.1", self.num_sec + 0.1)
+            # print("self.fps", self.fps)
+            # # 這裏的videopath有問題
+            # print(os.path.abspath("."))
             cmd = (
                 ffmpeg
                 .input(video_path, ss=start_seek, t=self.num_sec + 0.1)
+                # .input(video_path, ss=start_seek, t=self.num_sec + 0.1, acodec="copy")
                 .filter('fps', fps=self.fps)
             )
             if self.center_crop:
                 aw, ah = 0.5, 0.5
+                # print("center_crop")
             else:
                 aw, ah = random.uniform(0, 1), random.uniform(0, 1)
+                # print("no center_crop")
+
+            # print("self.size", self.size)
             if self.crop_only:
+                # print("self.crop_only", self.crop_only)
                 cmd = (
                     cmd.crop('(iw - {})*{}'.format(self.size, aw),
                              '(ih - {})*{}'.format(self.size, ah),
@@ -76,12 +86,24 @@ class HT100M_DataLoader(Dataset):
                              'min(iw,ih)')
                     .filter('scale', self.size, self.size)
                 )
+            # print("awah", aw, ah)
             if self.random_flip and random.uniform(0, 1) > 0.5:
                 cmd = cmd.hflip()
-            out, _ = (
-                cmd.output('pipe:', format='rawvideo', pix_fmt='rgb24')
-                .run(capture_stdout=True, quiet=True)
-            )
+            # out, _ = (
+            #     cmd.output('pipe:', format='rawvideo', pix_fmt='rgb24')
+            #     # .run(capture_stdout=True, quiet=True)
+            #     .run(capture_stdout=True, quiet=False,capture_stderr=True)
+            # )
+            cmd = cmd.output('pipe:', format='rawvideo', pix_fmt='rgb24')
+            # try:
+            out, _ = cmd.run(capture_stdout=True, quiet=False, capture_stderr=True)
+            # except Exception as e:
+            #     print("~~~outtype")
+            #     print(e)
+            #     print(e.stdout)
+            #     print(e.stderr)
+            #     print("___")
+
             video = np.frombuffer(out, np.uint8).reshape([-1, self.size, self.size, 3])
             video = th.from_numpy(video)
             video = video.permute(3, 0, 1, 2)
@@ -114,8 +136,8 @@ class HT100M_DataLoader(Dataset):
         return self._words_to_token(self._split_text(x))
 
     def _get_text(self, caption):
-        print("~~~~~~", caption)
-        print("~~~~~~", os.path.abspath(caption))
+        # print("~~~~~~", caption)
+        # print("~~~~~~", os.path.abspath(caption))
         caption_json = open(caption, 'r')
         cap = pd.DataFrame(json.load(caption_json))
         start, end = [], []
@@ -134,7 +156,7 @@ class HT100M_DataLoader(Dataset):
         return words, start, end
 
     def __getitem__(self, idx):
-        print("~~~idx", idx, "~~~")
+        # print("~~~idx", idx, "~~~")
         # print(self.csv)
 
         # video_file = self.csv['video_path'][idx]

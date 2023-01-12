@@ -9,3 +9,4 @@ data/downstream/hmdb/*
 loader/data/dict.npy
 loader/data/all_videos完整.csv
 loader/data/caption.json
+src/data/videos/*
