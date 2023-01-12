@@ -1,4 +1,5 @@
 import warnings
+
 warnings.simplefilter("ignore", UserWarning)
 import os
 import random
@@ -29,13 +30,17 @@ from sklearn.svm import LinearSVC
 
 allgather = AllGather.apply
 
+
 def main(args):
     model = deploy_model(args)
-    test_dataset = HMDB_DataLoader(data='./data/hmdb51.csv', num_clip=args.num_windows_test, video_root=args.eval_video_root,
-                            num_frames=args.num_frames, size=args.video_size, crop_only=False, center_crop=True, with_flip=True, )
+    test_dataset = HMDB_DataLoader(data='./data/hmdb51.csv', num_clip=args.num_windows_test,
+                                   video_root=args.eval_video_root,
+                                   num_frames=args.num_frames, size=args.video_size, crop_only=False, center_crop=True,
+                                   with_flip=True, )
     test_sampler = torch.utils.data.distributed.DistributedSampler(test_dataset)
-    test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=args.batch_size_val, shuffle=False, drop_last=False, 
-                                            num_workers=args.num_thread_reader, sampler=test_sampler)
+    test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=args.batch_size_val, shuffle=False,
+                                              drop_last=False,
+                                              num_workers=args.num_thread_reader, sampler=test_sampler)
 
     all_video_embd, labels, split1, split2, split3 = test(test_loader, model, args)
     if args.gpu == 0:
@@ -51,23 +56,28 @@ def main(args):
                     s = split2
                 else:
                     s = split3
-                X_train, X_test = all_video_embd[np.where(s == 1)[0]].reshape((-1, 1024)), all_video_embd[np.where(s == 2)[0]].reshape((-1, 1024))
-                label_train, label_test = labels[np.where(s == 1)[0]].repeat(args.num_windows_test), labels[np.where(s == 2)[0]]
+                X_train, X_test = all_video_embd[np.where(s == 1)[0]].reshape((-1, 1024)), all_video_embd[
+                    np.where(s == 2)[0]].reshape((-1, 1024))
+                label_train, label_test = labels[np.where(s == 1)[0]].repeat(args.num_windows_test), labels[
+                    np.where(s == 2)[0]]
                 print('Fitting SVM for split {} and C: {}'.format(split + 1, reg))
                 c.fit(X_train, label_train)
                 X_pred = c.decision_function(X_test)
                 X_pred = np.reshape(X_pred, (len(label_test), args.num_windows_test, -1))
                 X_pred = X_pred.sum(axis=1)
                 X_pred = np.argmax(X_pred, axis=1)
-                acc = np.sum(X_pred == label_test) / float(len(X_pred))  
+                acc = np.sum(X_pred == label_test) / float(len(X_pred))
                 print("Top 1 accuracy split {} and C {} : {}".format(split + 1, reg, acc))
                 acc_list.append(acc * 100)
-        
+
         print('HMDB')
-        print(f'Split1: {acc_list[0]:.2f} - Split2: {acc_list[1]:.2f} - Split3: {acc_list[2]:.2f} - Mean: {np.mean(acc_list):.2f}')
+        print(
+            f'Split1: {acc_list[0]:.2f} - Split2: {acc_list[1]:.2f} - Split3: {acc_list[2]:.2f} - Mean: {np.mean(acc_list):.2f}')
         with open('result.txt', 'a') as f:
             f.write('\nHMDB\n')
-            f.write(f'Split1: {acc_list[0]:.2f} - Split2: {acc_list[1]:.2f} - Split3: {acc_list[2]:.2f} - Mean: {np.mean(acc_list):.2f}\n')
+            f.write(
+                f'Split1: {acc_list[0]:.2f} - Split2: {acc_list[1]:.2f} - Split3: {acc_list[2]:.2f} - Mean: {np.mean(acc_list):.2f}\n')
+
 
 def test(test_loader, model, args):
     all_video_embd = []
@@ -95,23 +105,23 @@ def test(test_loader, model, args):
     split1, split2, split3 = torch.cat(split1, dim=0), torch.cat(split2, dim=0), torch.cat(split3, dim=0)
     split1, split2, split3 = allgather(split1, args), allgather(split2, args), allgather(split3, args)
     return all_video_embd.cpu().numpy(), labels.cpu().numpy(), split1.cpu().numpy(), split2.cpu().numpy(), split3.cpu().numpy()
-    
+
 
 def deploy_model(args):
     checkpoint_path = args.pretrain_cnn_path
     print("=> loading checkpoint '{}'".format(checkpoint_path))
-    checkpoint = torch.load(checkpoint_path, map_location='cpu')
-    print("args.gpu",args.gpu)
+    # checkpoint = torch.load(checkpoint_path, map_location='cpu')
+    print("args.gpu", args.gpu)
     torch.cuda.set_device(args.gpu)
-    model = S3D(args.num_class, space_to_depth=False, word2vec_path=args.word2vec_path)
-    model.cuda(args.gpu)
-    checkpoint_module = {k[7:]:v for k,v in checkpoint.items()}
-    model.load_state_dict(checkpoint_module)
+    # model = S3D(args.num_class, space_to_depth=False, word2vec_path=args.word2vec_path)
+    # model.cuda(args.gpu)
+    model=torch.load(checkpoint_path).cuda(args.gpu)
+
     model = torch.nn.parallel.DistributedDataParallel(model, device_ids=[args.gpu], find_unused_parameters=True)
     model.eval()
-    
     print(f'Model Loaded on GPU {args.gpu}')
     return model
+
 
 def main_worker(gpu, ngpus_per_node, main, args):
     cudnn.benchmark = True
@@ -126,10 +136,12 @@ def main_worker(gpu, ngpus_per_node, main, args):
     dist.init_process_group(backend='gloo', init_method=args.dist_url, world_size=ngpus_per_node, rank=gpu)
     main(args)
 
+
 def spawn_workers(main, args):
     # ngpus_per_node = 8
     ngpus_per_node = 1
     mp.spawn(main_worker, nprocs=ngpus_per_node, args=(ngpus_per_node, main, args))
+
 
 if __name__ == "__main__":
     args = get_args()

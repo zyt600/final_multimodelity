@@ -139,14 +139,17 @@ def main_worker(gpu, ngpus_per_node, args):
             train_sampler.set_epoch(epoch)
         train(train_loader, model, criterion, optimizer, scheduler, epoch, train_dataset, args)
         if args.rank == 0:
-            save_checkpoint(
-                {
-                    "epoch": epoch + 1,
-                    "state_dict": model.state_dict(),
-                    "optimizer": optimizer.state_dict(),
-                    "scheduler": scheduler.state_dict(),
-                }, checkpoint_dir, epoch + 1
-            )
+            if epoch <= 10 or (epoch <= 100 and epoch % 5 == 0) or epoch % 10 == 0:
+                torch.save(model, "../checkpoint/" + "epoch{:0>4d}.pth".format(epoch))
+            # print("~~~~~~~", os.path.abspath("."))
+            # save_checkpoint(
+            #     {
+            #         "epoch": epoch + 1,
+            #         "state_dict": model.state_dict(),
+            #         "optimizer": optimizer.state_dict(),
+            #         "scheduler": scheduler.state_dict(),
+            #     }, checkpoint_dir, epoch + 1
+            # )
 
 
 def train(train_loader, model, criterion, optimizer, scheduler, epoch, dataset, args):
