@@ -1,0 +1,8 @@
+1.change directory到VTTWINS这个根目录
+2.
+python extract_csv.py
+3.依次运行try_readjson.ipynb单元格
+4.
+python rename.py
+5.
+python src/train.py
