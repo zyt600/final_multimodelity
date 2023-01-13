@@ -21,7 +21,6 @@ class HT100M_DataLoader(Dataset):
         Args:
         """
         assert isinstance(size, int)
-        print("aaaaaaaa~~~", os.path.dirname(__file__))
         ppp = os.path.join(os.path.dirname(__file__), csv)
         # self.csv = pd.read_csv(os.path.join(os.path.dirname(__file__), csv))
         self.csv = pd.read_csv(ppp)
@@ -43,6 +42,7 @@ class HT100M_DataLoader(Dataset):
         self.num_candidates = num_candidates
         self.random_flip = random_left_right_flip
         self.num_clip = num_clip
+        print("Howto100m dataset len:{}".format(len(self.csv)))
 
     def __len__(self):
         return len(self.csv)

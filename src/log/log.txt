@@ -91,3 +91,5 @@ Starting training loop for rank: 0, total batch size: 1
 Starting training loop for rank: 0, total batch size: 1
 Starting training loop for rank: 0, total batch size: 1
 Starting training loop for rank: 0, total batch size: 1
+Starting training loop for rank: 0, total batch size: 1
+Starting training loop for rank: 0, total batch size: 1

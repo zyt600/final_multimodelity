@@ -109,18 +109,33 @@ def test(test_loader, model, args):
 
 def deploy_model(args):
     checkpoint_path = args.pretrain_cnn_path
-    print("=> loading checkpoint '{}'".format(checkpoint_path))
-    # checkpoint = torch.load(checkpoint_path, map_location='cpu')
-    print("args.gpu", args.gpu)
-    torch.cuda.set_device(args.gpu)
-    # model = S3D(args.num_class, space_to_depth=False, word2vec_path=args.word2vec_path)
-    # model.cuda(args.gpu)
-    model=torch.load(checkpoint_path).cuda(args.gpu)
+    if checkpoint_path!="./checkpoint/pretrained.pth.tar":
+        print("=> loading checkpoint '{}'".format(checkpoint_path))
+        # checkpoint = torch.load(checkpoint_path, map_location='cpu')
+        print("args.gpu", args.gpu)
+        torch.cuda.set_device(args.gpu)
+        # model = S3D(args.num_class, space_to_depth=False, word2vec_path=args.word2vec_path)
+        # model.cuda(args.gpu)
+        model=torch.load(checkpoint_path).cuda(args.gpu)
 
-    model = torch.nn.parallel.DistributedDataParallel(model, device_ids=[args.gpu], find_unused_parameters=True)
-    model.eval()
-    print(f'Model Loaded on GPU {args.gpu}')
-    return model
+        model = torch.nn.parallel.DistributedDataParallel(model, device_ids=[args.gpu], find_unused_parameters=True)
+        model.eval()
+        print(f'Model Loaded on GPU {args.gpu}')
+        return model
+    else:
+        checkpoint_path = args.pretrain_cnn_path
+        print("=> loading checkpoint '{}'".format(checkpoint_path))
+        checkpoint = torch.load(checkpoint_path, map_location='cpu')
+        torch.cuda.set_device(args.gpu)
+        model = S3D(args.num_class, space_to_depth=False, word2vec_path=args.word2vec_path)
+        model.cuda(args.gpu)
+        checkpoint_module = {k[7:]: v for k, v in checkpoint.items()}
+        model.load_state_dict(checkpoint_module)
+        model = torch.nn.parallel.DistributedDataParallel(model, device_ids=[args.gpu], find_unused_parameters=True)
+        model.eval()
+
+        print(f'Model Loaded on GPU {args.gpu}')
+        return model
 
 
 def main_worker(gpu, ngpus_per_node, main, args):

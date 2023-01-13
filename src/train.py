@@ -192,7 +192,7 @@ def TrainOneBatch(model, opt, scheduler, data, loss_fun, epoch, args):
 
 def save_checkpoint(state, checkpoint_dir, epoch, n_ckpt=10):
     print("~~~save~~~", os.path.join(r".\checkpoint", "epoch{:0>4d}.pth.tar".format(epoch)))
-    torch.save(state, os.path.join(r".\checkpoint", "epoch{:0>4d}.pth.tar".format(epoch)))
+    torch.save(state, os.path.join(r"..\checkpoint", "epoch{:0>4d}.pth.tar".format(epoch)))
 
 
 def log(output, args):
